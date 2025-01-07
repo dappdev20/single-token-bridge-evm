@@ -1,6 +1,4 @@
 import Image from "next/image";
-import { Inter } from "next/font/google";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { BiSolidDownArrow } from "react-icons/bi";
 import Logo from "../public/Logo.svg";
 import Swap from "./assets/Swap";
