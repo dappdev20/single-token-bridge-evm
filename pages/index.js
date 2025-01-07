@@ -18,19 +18,25 @@ export default function Home({ sendDataToParent }) {
     setdownName(downname == "XRP" ? "BSC" : "XRP");
   };
 
+  const handleConnect = async () => {
+    // await client.connect()
+    // const fund_result = await client.fundWallet()
+    // console.log(fund_result)
+  }
+
   return (
     <div className="bg-[#17161b] h-screen flex justify-center items-center py-10 px-4">
       <div className="bg-[#252027] rounded-xl p-4 max-w-3xl w-full mx-auto">
         <div className="bg-[#353037] rounded-lg p-3">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mt-7">
               <div className="w-10 h-10 rounded-full p-1 bg-[#212325] flex justify-center items-center">
                 <img src={Logo} alt="" className="h-7" />
               </div>
 
               <div>
                 <span className="text-[#bab6bc] font-normal text-sm">From</span>
-                <div className="text-[#ebefe9] flex gap-4 cursor-pointer items-center">
+                <div className="text-[#ebefe9] flex gap-4 cursor-pointer">
                   <p>{topname}</p>
                   <BiSolidDownArrow className="text-xs" />
                 </div>
@@ -38,7 +44,12 @@ export default function Home({ sendDataToParent }) {
             </div>
 
             <div className="text-[#f0e9fc] text-base">
-              <ConnectButton />
+              <button
+                className="w-full bg-[#3ab0ff] text-[#efefef] font-medium text-center p-[10px] rounded-xl mt-7"
+                onClick={handleConnect}
+              >
+                Connect Wallet
+              </button>
             </div>
           </div>
 
@@ -67,14 +78,14 @@ export default function Home({ sendDataToParent }) {
 
         <div className="flex justify-center items-center">
           <button onClick={handleswapButtonClick}>
-            <Swap className="h-10 w-10"/>
+            <Swap className="h-10 w-10" />
           </button>
         </div>
 
         <div className="bg-[#353037] rounded-lg p-3">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full p-1 bg-[#212325] flex justify-center items-center">
-              <img src={Logo} alt="" className="h-6"/>
+              <img src={Logo} alt="" className="h-6" />
             </div>
             <div>
               <span className="text-[#bab6bc] font-normal text-sm">To</span>
@@ -92,7 +103,7 @@ export default function Home({ sendDataToParent }) {
               </div>
 
               <div className="flex-1">
-                <div className="text-[#ebefe9] flex gap-4 cursor-pointer">
+                <div className="text-[#ebefe9] flex gap-4 cursor-pointer items-center">
                   <p>USDT</p>
                   <BiSolidDownArrow className="text-xs" />
                 </div>
