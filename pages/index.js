@@ -44,14 +44,27 @@ export default function Home({ sendDataToParent }) {
   const calcSendAmount = (token, deltaAmount) => {
     try {
       let result = 0;
-      if (deltaAmount === "")
+      if (deltaAmount === "") {
         deltaAmount = 0;
+        console.log('delta = 0...');
+      }
+      
       if (token === "XRP") {
-        result = (deltaAmount * XRPCashAmount) / (XRPAmount + deltaAmount);
+        if (deltaAmount >= XRPAmount) {
+          toast.error('XRP amount must be less than the total amount...');
+          return;
+        }
+        result = (deltaAmount * XRPCashAmount) / (XRPAmount - deltaAmount);
+        console.log('xrp...', result, deltaAmount, XRPCashAmount, XRPAmount);
       } else {
+        if (deltaAmount >= XRPCashAmount) {
+          toast.error('XRPCash amount must be less than the total amount...');
+          return;
+        }
+        
         result = (deltaAmount * XRPAmount) / (XRPCashAmount - deltaAmount);
       }
-      setDownAmount(Number(result));
+      setDownAmount(result);
 
     } catch (e) {
       console.log('Out amount error : ', e);
@@ -77,7 +90,6 @@ export default function Home({ sendDataToParent }) {
           }
         });
       } else {
-        toast.error('You must install wallet...');
       }
 
     } catch (e) {
@@ -94,6 +106,7 @@ export default function Home({ sendDataToParent }) {
       return;
     }
     if (RE.test(e.currentTarget.value)) {
+      console.log('input change...', e.target.value);
       settopAmount(e.target.value);
     } else {
       console.log('error...');
