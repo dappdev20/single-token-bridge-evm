@@ -108,7 +108,7 @@ export default function Home({ sendDataToParent }) {
         return;
       }
       if (topname === "XRP") {
-        if (Number(topAmount * 10 ** 6) < 1) {
+        if (Number(topAmount) < 0.1) {
           toast.error("XRP amount must be greater than 0.000001...");
           return;
         }
@@ -178,8 +178,8 @@ export default function Home({ sendDataToParent }) {
         });
         // });
       } else {
-        if (Number(downAmount * 10 ** 6) < 1) {
-          toast.error("XRP amount must be greater than 0.000001...");
+        if (Number(downAmount) < 0.1) {
+          toast.error("XRP amount must be greater than 0.1...");
           return;
         }
         console.log('Sending XRPCash token1...');
