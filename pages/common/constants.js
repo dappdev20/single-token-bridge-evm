@@ -4,4 +4,6 @@ export const MAIN_RPC = {
 }
 
 const XRPL_RESERVE_AMOUNT = 3
-export default XRPL_RESERVE_AMOUNT
+export {
+    XRPL_RESERVE_AMOUNT,
+};
