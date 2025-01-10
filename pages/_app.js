@@ -13,6 +13,7 @@ import {
   base,
 } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
 
 export default function App({ Component, pageProps }) {
   const config = getDefaultConfig({
@@ -28,6 +29,7 @@ export default function App({ Component, pageProps }) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
           <Component {...pageProps} />;{/* Your App */}
+          <ToastContainer />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

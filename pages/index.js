@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import * as xrpl from 'xrpl';
 import { isInstalled, getAddress, sendPayment, addTrustline, setTrustline } from "@gemwallet/api";
 import { MAIN_RPC, XRPL_RESERVE_AMOUNT } from "./common/constants";
+import { toast } from "react-toastify";
 import * as afx from './common/global';
 
 export const XRPAmount = 100;
@@ -40,7 +41,6 @@ export default function Home({ sendDataToParent }) {
   const [walletConnected, setWalletConnected] = useState(false);
 
   const calcSendAmount = (token, deltaAmount) => {
-    console.log('delta amount = ', deltaAmount);
     try {
       let result = 0;
       if (deltaAmount === "")
@@ -48,9 +48,8 @@ export default function Home({ sendDataToParent }) {
       if (token === "XRP") {
         result = (deltaAmount * XRPCashAmount) / (XRPAmount + deltaAmount);
       } else {
-        result = (deltaAmount * XRPAmount) / (XRPCashAmount + deltaAmount);
+        result = (deltaAmount * XRPAmount) / (XRPCashAmount - deltaAmount);
       }
-      console.log('out amount = ', result);
       setDownAmount(Number(result));
 
     } catch (e) {
@@ -72,137 +71,160 @@ export default function Home({ sendDataToParent }) {
               console.log(`Your address: ${response.result?.address}`);
               setWalletConnected(true);
               setWalletAddress(response.result?.address);
+              toast.success(`Your address: ${response.result?.address}`);
             });
           }
         });
       } else {
-
+        toast.error('You must install wallet...');
       }
 
     } catch (e) {
+      toast.error('Wallet connect error...');
       console.log('Wallet Connect error: ', e);
     }
   }
 
-  const oPcreateTrustlineAndSendToken = async (issuerWalletAddress, receiverWalletAddress, tokenCode, supply) => {
-    afx.client.connect();
-    // Create trust line from hot to cold address --------------------------------
-    const trust_set_tx = {
-      "TransactionType": "TrustSet",
-      "Account": receiverWalletAddress,
-      "LimitAmount": {
-        "currency": tokenCode,
-        "issuer": issuerWalletAddress,
-        "value": supply.toString() // Large limit, arbitrarily chosen
-      },
-      "Flags": xrpl.TrustSetFlags.tfClearNoRipple | xrpl.TrustSetFlags.tfSetNoRipple,
+  const handleChange = async (e) => {
+    const RE = /^\d*\.?\d{0,18}$/;
+    if (e.target.value === ".") {
+      console.log('input .....');
+      settopAmount("0");
+      return;
     }
-
-    const ts_prepared = await afx.client.autofill(trust_set_tx)
-    const ts_signed = receiverWallet.sign(ts_prepared)
-    console.log("Creating trust line from hot address to issuer...")
-    const ts_result = await afx.client.submitAndWait(ts_signed.tx_blob)
-    const ts_metaInfo = ts_result.result.meta;
-    if (ts_metaInfo.TransactionResult == "tesSUCCESS") {
-      console.log(`Transaction succeeded: https://xrpscan.com/tx/${ts_signed.hash}`)
+    if (RE.test(e.currentTarget.value)) {
+      settopAmount(e.target.value);
     } else {
-      throw new Error(`sending transaction: ${ts_result}`)
+      console.log('error...');
+      return;
     }
-
-    const payment = {
-      "TransactionType": "Payment",
-      Account: issuerWallet.address,
-      Destination: receiverWallet.address,
-      "Amount": {
-        currency: tokenCode,
-        issuer: issuerWallet.address,
-        value: supply.toString(),
-      },
-      "DestinationTag": 1,
-    }
-
-    const preparedPayment = await afx.client.autofill(payment);
-    const signedPayment = issuerWallet.sign(preparedPayment);
-    console.log(`Cold to hot - Sending ${supply} ${tokenCode} to ${receiverWallet.address}...`)
-    const payment_result = await afx.client.submitAndWait(signedPayment.tx_blob);
-    const payment_metainfo = payment_result.result.meta;
-    if (payment_metainfo.TransactionResult == "tesSUCCESS") {
-      console.log(`Transaction succeeded: https://xrpscan.com/tx/${signedPayment.hash}`)
-    } else {
-      console.log(payment_result)
-      throw new Error(`sending transaction: ${payment_result}`)
-    }
-  }
+    calcSendAmount(topname === "XRP" ? "XRP" : "XRPCash", e.target.value);
+  };
 
   const handleBridge = async () => {
     try {
+      if (walletAddress === "") {
+        toast.error("Please connect wallet...");
+        return;
+      }
       if (topname === "XRP") {
-        // getAddress().then(async (response) => {
-        const payment = {
-          amount: Number(topAmount * 10 ** 6).toString(),
-          destination: "rHdgdah44dFT6JxsZgid2veeHDMVRwGSj8",
-          destinationTag: 12,
-        };
-        // sendPayment(payment).then(async(response) => {
-        //   console.log("Transaction Hash1: ", response.result?.hash);
-        const trustline = {
-          limitAmount: {
-            currency: "5852504300000000000000000000000000000000",
-            issuer: "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
-            value: Number(800000000000).toString(),
-          },
-          memos: [
-            {
-              memo: {
-                memoType: "4465736372697074696f6e",
-                memoData: "54657374206d656d6f",
-              },
+        if (Number(topAmount * 10 ** 6) < 1) {
+          toast.error("XRP amount must be greater than 0.000001...");
+          return;
+        }
+        getAddress().then(async (response) => {
+          const payment = {
+            amount: Number(topAmount * 10 ** 6).toString(),
+            destination: "rHdgdah44dFT6JxsZgid2veeHDMVRwGSj8",
+            destinationTag: 12,
+          };
+          console.log('Sending XRP to the wallet...');
+          // sendPayment(payment).then(async(response) => {
+          //   console.log("Transaction Hash1: ", response.result?.hash);
+          const trustline = {
+            limitAmount: {
+              currency: "5852504300000000000000000000000000000000",
+              issuer: "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
+              value: Number(800000000000).toString(),
             },
-          ],
-          fee: "199",
-          flags: xrpl.TrustSetFlags.tfClearNoRipple | xrpl.TrustSetFlags.tfSetNoRipple,
+            memos: [
+              {
+                memo: {
+                  memoType: "4465736372697074696f6e",
+                  memoData: "54657374206d656d6f",
+                },
+              },
+            ],
+            fee: "199",
+            flags: xrpl.TrustSetFlags.tfClearNoRipple | xrpl.TrustSetFlags.tfSetNoRipple,
+          };
+          console.log('Setting trust line in the receiver wallet...');
+          setTrustline(trustline).then(async (response) => {
+            console.log("Trust line Transaction Hash2: ", response.result?.hash);
+            await afx.client.connect();
+            let issuerWallet = xrpl.Wallet.fromSeed("sEd7Jsm17dpzwALk6N97jBQHBSE48xZ")
+            console.log('issuer wallet = ', issuerWallet.address, 'receiver wallet = ', walletAddress);
+            const payment1 = {
+              "TransactionType": "Payment",
+              "Account": "rHdgdah44dFT6JxsZgid2veeHDMVRwGSj8",
+              "Destination": walletAddress,
+              "Amount": {
+                "currency": "5852504300000000000000000000000000000000",
+                "issuer": "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
+                "value": Number(downAmount.toFixed(2)).toString(),
+              },
+              "Memos": undefined,
+              "DestinationTag": 12,
+              "Flags": 2147483648, // Optional: Allow partial payment
+            }
+            console.log('Sending XRPCash token...');
+
+            const preparedPayment = await afx.client.autofill(payment1);
+            const signedPayment = issuerWallet.sign(preparedPayment);
+            // console.log(`Cold to hot - Sending ${supply} ${tokenCode} to ${receiverWallet.address}...`)
+            const payment_result = await afx.client.submitAndWait(signedPayment.tx_blob);
+            const payment_metainfo = payment_result.result.meta;
+            if (payment_metainfo.TransactionResult == "tesSUCCESS") {
+              console.log(`Transaction succeeded: https://xrpscan.com/tx/${signedPayment.hash}`)
+              toast.success('Transaction succeeded...');
+              await afx.client.disconnect()
+            } else {
+              console.log(payment_result);
+              toast.error('Transaction failed...');
+              await afx.client.disconnect()
+              throw new Error(`sending transaction: ${payment_result}`);
+            }
+          });
+        });
+        // });
+      } else {
+        if (Number(downAmount * 10 ** 6) < 1) {
+          toast.error("XRP amount must be greater than 0.000001...");
+          return;
+        }
+        console.log('Sending XRPCash token1...');
+        const payment = {
+          amount: {
+            currency: "5852504300000000000000000000000000000000",
+            value: Number(topAmount).toString(),
+            issuer: "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
+          },
+          destination: "rHdgdah44dFT6JxsZgid2veeHDMVRwGSj8",
+          destinationTag: 12
         };
-
-        setTrustline(trustline).then(async (response) => {
-          console.log(response.result?.hash);
-
-          //   console.log("Transaction Hash2: ", response.result?.hash);
-          let issuerWallet = xrpl.Wallet.fromSeed("sEd7Jsm17dpzwALk6N97jBQHBSE48xZ")
-          console.log('isseu wallet = ', issuerWallet.address, walletAddress);
+        sendPayment(payment).then(async (trHash) => {
+          console.log("Transaction Hash: ", trHash);
+          console.log('Sending XRP...');
           const payment1 = {
             "TransactionType": "Payment",
             "Account": "rHdgdah44dFT6JxsZgid2veeHDMVRwGSj8",
             "Destination": walletAddress,
-            "Amount": {
-              "currency": "5852504300000000000000000000000000000000",
-              "issuer": "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
-              "value": Number(downAmount.toFixed(2)).toString(),
-            },
+            "Amount": Math.ceil(downAmount * 1000000).toString(),
             "Memos": undefined,
             "DestinationTag": 12,
             "Flags": 2147483648, // Optional: Allow partial payment
           }
           await afx.client.connect();
-          console.log('stat paying...1');
+          let issuerWallet = xrpl.Wallet.fromSeed("sEd7Jsm17dpzwALk6N97jBQHBSE48xZ")
           const preparedPayment = await afx.client.autofill(payment1);
-          console.log('stat paying...2');
           const signedPayment = issuerWallet.sign(preparedPayment);
           // console.log(`Cold to hot - Sending ${supply} ${tokenCode} to ${receiverWallet.address}...`)
           const payment_result = await afx.client.submitAndWait(signedPayment.tx_blob);
           const payment_metainfo = payment_result.result.meta;
           if (payment_metainfo.TransactionResult == "tesSUCCESS") {
             console.log(`Transaction succeeded: https://xrpscan.com/tx/${signedPayment.hash}`)
+            toast.success('Transaction succeeded...');
+            await afx.client.disconnect()
           } else {
-            console.log(payment_result)
-            throw new Error(`sending transaction: ${payment_result}`)
+            console.log(payment_result);
+            toast.error('Transaction failed...');
+            await afx.client.disconnect()
+            throw new Error(`sending transaction: ${payment_result}`);
           }
-          await afx.client.disconnect()
         });
-        // });
-        // });
       }
-
     } catch (e) {
+      toast.error('Transaction failed...');
       console.log('Wallet Connect error: ', e);
     }
   }
@@ -253,10 +275,8 @@ export default function Home({ sendDataToParent }) {
               type="text"
               placeholder="0.00000"
               className="bg-transparent flex-1 outline-none border-none text-base text-[#ebefe9]"
-              onChange={((e) => {
-                calcSendAmount(topname === "XRP" ? "XRP" : "XRPCash", e.target.value);
-                settopAmount(e.target.value)
-              })}
+              value={topAmount}
+              onChange={handleChange}
             />
           </div>
         </div>
