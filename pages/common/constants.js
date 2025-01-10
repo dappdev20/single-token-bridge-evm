@@ -5,3 +5,4 @@ export const MAIN_RPC = {
 }
 
 export const XRPL_RESERVE_AMOUNT = 3;
+export default XRPL_RESERVE_AMOUNT;
