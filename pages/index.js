@@ -43,6 +43,9 @@ export default function Home({ sendDataToParent }) {
 
   const calcSendAmount = (token, deltaAmount) => {
     try {
+      if (walletAddress === "") {
+        return;
+      }
       let result = 0;
       if (deltaAmount === "") {
         deltaAmount = 0;
