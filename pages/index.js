@@ -5,10 +5,10 @@ import Swap from "./assets/Swap";
 import React, { useState, useEffect } from "react";
 import * as xrpl from 'xrpl';
 import { isInstalled, getAddress, sendPayment, addTrustline, setTrustline } from "@gemwallet/api";
-import { MAIN_RPC } from "./common/constants";
-import { XRPL_RESERVE_AMOUNT } from "./common/constants"; // Ensure XRPL_RESERVE_AMOUNT is exported from constants
+import { MAIN_RPC } from "../common/constants";
+import { XRPL_RESERVE_AMOUNT } from "../common/constants"; // Ensure XRPL_RESERVE_AMOUNT is exported from constants
 import { toast } from "react-toastify";
-import * as afx from './common/global';
+import * as afx from '../common/global';
 
 export const XRPAmount = 100;
 export const XRPCashAmount = 800000000;
