@@ -10,8 +10,8 @@ import { XRPL_RESERVE_AMOUNT } from "../common/constants"; // Ensure XRPL_RESERV
 import { toast } from "react-toastify";
 import * as afx from '../common/global';
 
-export const XRPAmount = 100;
-export const XRPCashAmount = 800000000;
+export const XRPAmount = 10000;
+export const XRPCashAmount = 800_000_000;
 
 export const getXrpBalance = async (address) => {
   try {
@@ -53,19 +53,10 @@ export default function Home({ sendDataToParent }) {
       }
       
       if (token === "XRP") {
-        if (deltaAmount >= XRPAmount) {
-          toast.error('XRP amount must be less than the total amount...');
-          return;
-        }
-        result = (deltaAmount * XRPCashAmount) / (XRPAmount - deltaAmount);
+        result = (Number(deltaAmount) * XRPCashAmount) / (XRPAmount + Number(deltaAmount));
         console.log('xrp...', result, deltaAmount, XRPCashAmount, XRPAmount);
       } else {
-        if (deltaAmount >= XRPCashAmount) {
-          toast.error('XRPCash amount must be less than the total amount...');
-          return;
-        }
-        
-        result = (deltaAmount * XRPAmount) / (XRPCashAmount - deltaAmount);
+        result = (Number(deltaAmount) * XRPAmount) / (XRPCashAmount + Number(deltaAmount));
       }
       setDownAmount(result);
 
@@ -90,7 +81,12 @@ export default function Home({ sendDataToParent }) {
               setWalletAddress(response.result?.address);
               toast.success(`Your address: ${response.result?.address}`);
             });
+          } else {
+            toast.error(`You must install xrp wallet...`);
           }
+        }).catch((e) => {
+          toast.success(`You must install xrp wallet...`);
+          console.log('error: ', e);
         });
       } else {
       }
