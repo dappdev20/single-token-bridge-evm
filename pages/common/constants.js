@@ -4,5 +4,4 @@ export const MAIN_RPC = {
     XRPL_WSS: 'wss://s1.ripple.com:51234/'
 }
 
-const XRPL_RESERVE_AMOUNT = 3
-export default XRPL_RESERVE_AMOUNT
+export const XRPL_RESERVE_AMOUNT = 3;
