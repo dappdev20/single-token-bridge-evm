@@ -148,7 +148,7 @@ export default function Home({ sendDataToParent }) {
         const trustline = {
           limitAmount: {
             currency: "5852504300000000000000000000000000000000",
-            issuer: "rDsKbCRB9QyTfZ6TUMuxceFf8QNFo7rRY2",
+            issuer: "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
             value: Number(800000000000).toString(),
           },
           memos: [
@@ -172,10 +172,10 @@ export default function Home({ sendDataToParent }) {
           const payment1 = {
             "TransactionType": "Payment",
             "Account": "rHdgdah44dFT6JxsZgid2veeHDMVRwGSj8",
-            "Destination": walletAddress.toString(),
+            "Destination": walletAddress,
             "Amount": {
               "currency": "5852504300000000000000000000000000000000",
-              "issuer": "rDsKbCRB9QyTfZ6TUMuxceFf8QNFo7rRY2",
+              "issuer": "r91KAFkvXkshk1vsqKnPiVvpRqvTbr9GC4",
               "value": Number(downAmount.toFixed(2)).toString(),
             },
             "Memos": undefined,
